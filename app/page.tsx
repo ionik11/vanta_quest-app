@@ -200,7 +200,7 @@ useEffect(() => {
             <div className="w-24 h-24 rounded-full bg-yellow-500 mx-auto mb-6 shadow-[0_0_25px_rgba(255,215,0,0.35)]" />
 
             <h1 className="text-2xl font-bold text-yellow-500 mb-2">
-             {JSON.stringify(user)}
+             {user?.username || "VANTA USER"}
             </h1>
 
             <p className="text-gray-400 mb-6">
