@@ -1,6 +1,10 @@
 "use client";
 
-import { initData } from "@telegram-apps/sdk";
+declare global {
+  interface Window {
+    Telegram?: any;
+  }
+}
 import { useState, useEffect } from "react";
 import {
   Search,
@@ -12,7 +16,26 @@ import {
 } from "lucide-react";
 
 export default function Home() {
-  const user = initData.user();
+useEffect(() => {
+  if (typeof window !== "undefined") {
+    window.Telegram?.WebApp?.ready();
+  }
+}, []);
+
+const [user, setUser] = useState<any>(null);
+
+useEffect(() => {
+  if (typeof window !== "undefined") {
+    window.Telegram?.WebApp?.ready();
+
+    const tgUser =
+      window.Telegram?.WebApp?.initDataUnsafe?.user;
+
+    console.log(tgUser);
+
+    setUser(tgUser);
+  }
+}, []);
   const [entered, setEntered] = useState(false);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("quest");
