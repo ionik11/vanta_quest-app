@@ -39,6 +39,8 @@ useEffect(() => {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("quest");
 
+  const [nickname, setNickname] = useState("");
+  const [savedName, setSavedName] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [showHints, setShowHints] = useState(false);
   const [openedHint, setOpenedHint] = useState<number | null>(null);
@@ -51,7 +53,13 @@ useEffect(() => {
       setLoading(false);
     }, 2000);
   }, []);
+useEffect(() => {
+  const storedName = localStorage.getItem("vanta_name");
 
+  if (storedName) {
+    setSavedName(storedName);
+  }
+}, []);
   if (loading) {
     return (
       <main className="h-screen bg-black text-white flex items-center justify-center">
@@ -68,6 +76,40 @@ useEffect(() => {
     );
   }
 
+  if (!savedName) {
+  return (
+    <main className="h-screen bg-black text-white flex items-center justify-center px-6">
+
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.08),transparent_60%)]" />
+
+      <div className="relative z-10 w-full max-w-sm bg-[#111111] border border-yellow-600 rounded-3xl p-6 shadow-[0_0_35px_rgba(255,215,0,0.12)]">
+
+        <h1 className="text-3xl font-bold text-yellow-500 mb-6 tracking-[6px] text-center">
+          CREATE IDENTITY
+        </h1>
+
+        <input
+          value={nickname}
+          onChange={(e) => setNickname(e.target.value)}
+          placeholder="Enter nickname"
+          className="w-full bg-[#1A1A1A] border border-[#333] rounded-2xl px-4 py-4 text-white outline-none mb-5"
+        />
+
+        <button
+          onClick={() => {
+            if (nickname.trim()) {
+              localStorage.setItem("vanta_name", nickname);
+              setSavedName(nickname);
+            }
+          }}
+          className="w-full bg-yellow-500 hover:bg-yellow-400 transition-all duration-300 text-black font-bold py-4 rounded-2xl shadow-[0_0_25px_rgba(255,215,0,0.35)]"
+        >
+          ENTER VANTA
+        </button>
+      </div>
+    </main>
+  );
+}
   if (!entered) {
     return (
       <main className="h-screen bg-black text-white flex items-center justify-center px-6">
@@ -199,7 +241,7 @@ useEffect(() => {
             <div className="w-24 h-24 rounded-full bg-yellow-500 mx-auto mb-6 shadow-[0_0_25px_rgba(255,215,0,0.35)]" />
 
             <h1 className="text-2xl font-bold text-yellow-500 mb-2">
-             {user?.first_name || "VANTA USER"}
+             {savedName}
             </h1>
 
             <p className="text-gray-400 mb-6">
