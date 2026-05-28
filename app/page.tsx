@@ -25,16 +25,20 @@ useEffect(() => {
 const [user, setUser] = useState<any>(null);
 
 useEffect(() => {
-  if (typeof window !== "undefined") {
-    window.Telegram?.WebApp?.ready();
+  const timer = setTimeout(() => {
+    if (typeof window !== "undefined") {
+      const tg = window.Telegram?.WebApp;
 
-    const tgUser =
-      window.Telegram?.WebApp?.initDataUnsafe?.user;
+      tg?.ready();
 
-    console.log(tgUser);
+      console.log("TG:", tg);
+      console.log("USER:", tg?.initDataUnsafe?.user);
 
-    setUser(tgUser);
-  }
+      setUser(tg?.initDataUnsafe?.user || null);
+    }
+  }, 1000);
+
+  return () => clearTimeout(timer);
 }, []);
   const [entered, setEntered] = useState(false);
   const [loading, setLoading] = useState(true);
