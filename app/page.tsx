@@ -58,7 +58,7 @@ useEffect(() => {
       <main className="h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center animate-pulse">
           <h1 className="text-5xl font-bold tracking-[12px] text-yellow-500 mb-4">
-            VANTA
+            VANTA TEST
           </h1>
 
           <p className="text-gray-500 tracking-[4px] text-sm">
