@@ -1,5 +1,6 @@
 "use client";
 
+import { initData } from "@telegram-apps/sdk";
 import { useState, useEffect } from "react";
 import {
   Search,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 
 export default function Home() {
+  const user = initData.user();
   const [entered, setEntered] = useState(false);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("quest");
@@ -175,7 +177,7 @@ export default function Home() {
             <div className="w-24 h-24 rounded-full bg-yellow-500 mx-auto mb-6 shadow-[0_0_25px_rgba(255,215,0,0.35)]" />
 
             <h1 className="text-2xl font-bold text-yellow-500 mb-2">
-              VANTA USER
+             {user?.username || "VANTA USER"}
             </h1>
 
             <p className="text-gray-400 mb-6">
