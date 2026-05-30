@@ -47,6 +47,14 @@ useEffect(() => {
 
   const [code, setCode] = useState("");
   const [message, setMessage] = useState("");
+  const [timeLeft, setTimeLeft] = useState("");
+  const [foundScreen, setFoundScreen] = useState(false);
+  
+  const [hint2Unlocked, setHint2Unlocked] = useState(false);
+  const [hint3Unlocked, setHint3Unlocked] = useState(false);
+
+  const [hint2Time, setHint2Time] = useState("");
+  const [hint3Time, setHint3Time] = useState("");
 
   useEffect(() => {
     setTimeout(() => {
@@ -54,15 +62,82 @@ useEffect(() => {
     }, 2000);
   }, []);
 useEffect(() => {
+  const targetDate = new Date();
+  targetDate.setHours(targetDate.getHours() + 5);
+
+  const interval = setInterval(() => {
+    const now = new Date().getTime();
+    const distance = targetDate.getTime() - now;
+
+    if (distance <= 0) {
+      setTimeLeft("00:00:00");
+      clearInterval(interval);
+      return;
+    }
+
+    const hours = Math.floor((distance / (1000 * 60 * 60)) % 24);
+    const minutes = Math.floor((distance / (1000 * 60)) % 60);
+    const seconds = Math.floor((distance / 1000) % 60);
+
+    setTimeLeft(
+      `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+    );
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, []);
+useEffect(() => {
   const storedName = localStorage.getItem("vanta_name");
 
   if (storedName) {
     setSavedName(storedName);
   }
 }, []);
+useEffect(() => {
+  const hint2Date = new Date();
+  hint2Date.setMinutes(hint2Date.getMinutes() + 2);
+
+  const hint3Date = new Date();
+  hint3Date.setMinutes(hint3Date.getMinutes() + 5);
+
+  const interval = setInterval(() => {
+    const now = new Date().getTime();
+
+    const hint2Distance = hint2Date.getTime() - now;
+    const hint3Distance = hint3Date.getTime() - now;
+
+    if (hint2Distance <= 0) {
+      setHint2Unlocked(true);
+      setHint2Time("ОТКРЫТА");
+    } else {
+      const h = Math.floor((hint2Distance / (1000 * 60 * 60)) % 24);
+      const m = Math.floor((hint2Distance / (1000 * 60)) % 60);
+      const s = Math.floor((hint2Distance / 1000) % 60);
+
+      setHint2Time(
+        `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+      );
+    }
+
+    if (hint3Distance <= 0) {
+      setHint3Unlocked(true);
+      setHint3Time("ОТКРЫТА");
+    } else {
+      const h = Math.floor((hint3Distance / (1000 * 60 * 60)) % 24);
+      const m = Math.floor((hint3Distance / (1000 * 60)) % 60);
+      const s = Math.floor((hint3Distance / 1000) % 60);
+
+      setHint3Time(
+        `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
+      );
+    }
+  }, 1000);
+
+  return () => clearInterval(interval);
+}, []);
   if (loading) {
     return (
-      <main className="h-screen bg-black text-white flex items-center justify-center">
+      <main className="h-screen bg-black relative overflow-hidden text-white flex items-center justify-center">
         <div className="text-center animate-pulse">
           <h1 className="text-5xl font-bold tracking-[12px] text-yellow-500 mb-4">
             VANTA TEST
@@ -78,7 +153,7 @@ useEffect(() => {
 
   if (!savedName) {
   return (
-    <main className="h-screen bg-black text-white flex items-center justify-center px-6">
+    <main className="h-screen bg-black relative overflow-hidden text-white flex items-center justify-center px-6">
 
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.08),transparent_60%)]" />
 
@@ -112,7 +187,7 @@ useEffect(() => {
 }
   if (!entered) {
     return (
-      <main className="h-screen bg-black text-white flex items-center justify-center px-6">
+      <main className="h-screen bg-black relative overflow-hidden text-white flex items-center justify-center px-6">
 
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,215,0,0.08),transparent_60%)]" />
 
@@ -142,8 +217,20 @@ useEffect(() => {
   }
 
   return (
-    <main className="min-h-screen bg-black text-white flex flex-col justify-center items-center px-6 py-8">
+    <main className="min-h-screen bg-black relative overflow-hidden text-white flex flex-col justify-center items-center px-6 py-8">
+<div className="absolute inset-0 opacity-20 pointer-events-none bg-[linear-gradient(rgba(255,215,0,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(255,215,0,0.08)_1px,transparent_1px)] bg-[size:32px_32px]" />
 
+<div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+
+  <div className="absolute top-[10%] left-[20%] w-2 h-2 bg-yellow-500 rounded-full blur-sm animate-pulse" />
+
+  <div className="absolute top-[30%] right-[15%] w-1 h-1 bg-yellow-400 rounded-full blur-sm animate-ping" />
+
+  <div className="absolute bottom-[20%] left-[10%] w-2 h-2 bg-yellow-500 rounded-full blur-md animate-pulse" />
+
+  <div className="absolute bottom-[35%] right-[25%] w-1 h-1 bg-yellow-300 rounded-full blur-sm animate-ping" />
+
+</div>
       <div className="w-full max-w-sm">
 
         {tab === "quest" && (
@@ -186,7 +273,7 @@ useEffect(() => {
             </p>
 
             <p className="text-2xl text-yellow-500 font-bold mb-6">
-              05:23:47
+              {timeLeft}
             </p>
 
             <button
@@ -319,11 +406,17 @@ useEffect(() => {
 
             <button
               onClick={() => {
-                if (code === "QUEST001") {
-                  setMessage("КАРТОЧКА НАЙДЕНА");
-                } else {
-                  setMessage("НЕВЕРНЫЙ КОД");
-                }
+              if (code === "QUEST001") {
+  setFoundScreen(true);
+
+  setTimeout(() => {
+    setFoundScreen(false);
+    setShowModal(false);
+  }, 3500);
+
+} else {
+  setMessage("НЕВЕРНЫЙ КОД");
+}
               }}
               className="w-full bg-yellow-500 hover:bg-yellow-400 transition-all duration-300 active:scale-[0.98] text-black font-bold py-4 rounded-2xl mb-3"
             >
@@ -385,48 +478,85 @@ useEffect(() => {
               <div className="h-28 rounded-2xl bg-[#1A1A1A] border border-[#222]" />
             </button>
 
-            <div className="w-full bg-[#111111] border border-[#333] rounded-3xl p-5">
+            {hint2Unlocked ? (
+  <button
+    onClick={() => setOpenedHint(2)}
+    className="w-full bg-[#111111] border border-yellow-600 rounded-3xl p-5 text-left"
+  >
+    <div className="flex items-center justify-between mb-3">
+      <h2 className="text-yellow-500 font-bold">
+        ПОДСКАЗКА 2
+      </h2>
 
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-gray-400 font-bold">
-                  ПОДСКАЗКА 2
-                </h2>
+      <span className="text-green-500 text-sm">
+        ДОСТУПНА
+      </span>
+    </div>
 
-                <Lock className="text-yellow-500" />
-              </div>
+    <div className="h-28 rounded-2xl bg-[#1A1A1A] border border-[#222]" />
+  </button>
+) : (
+  <div className="w-full bg-[#111111] border border-[#333] rounded-3xl p-5">
 
-              <p className="text-gray-500 text-sm">
-                Откроется через:
-              </p>
+    <div className="flex items-center justify-between mb-3">
+      <h2 className="text-gray-400 font-bold">
+        ПОДСКАЗКА 2
+      </h2>
 
-              <p className="text-yellow-500 text-2xl font-bold mt-2">
-                02:15:34
-              </p>
-            </div>
+      <Lock className="text-yellow-500" />
+    </div>
 
-            <div className="w-full bg-[#111111] border border-[#333] rounded-3xl p-5">
+    <p className="text-gray-500 text-sm">
+      Откроется через:
+    </p>
 
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-gray-400 font-bold">
-                  ПОДСКАЗКА 3
-                </h2>
+    <p className="text-yellow-500 text-2xl font-bold mt-2">
+      {hint2Time}
+    </p>
 
-                <Lock className="text-yellow-500" />
-              </div>
+  </div>
+)}
+            {hint3Unlocked ? (
+  <button
+    onClick={() => setOpenedHint(3)}
+    className="w-full bg-[#111111] border border-yellow-600 rounded-3xl p-5 text-left"
+  >
+    <div className="flex items-center justify-between mb-3">
+      <h2 className="text-yellow-500 font-bold">
+        ПОДСКАЗКА 3
+      </h2>
 
-              <p className="text-gray-500 text-sm">
-                Откроется через:
-              </p>
+      <span className="text-green-500 text-sm">
+        ДОСТУПНА
+      </span>
+    </div>
 
-              <p className="text-yellow-500 text-2xl font-bold mt-2">
-                05:23:47
-              </p>
-            </div>
+    <div className="h-28 rounded-2xl bg-[#1A1A1A] border border-[#222]" />
+  </button>
+) : (
+  <div className="w-full bg-[#111111] border border-[#333] rounded-3xl p-5">
 
+    <div className="flex items-center justify-between mb-3">
+      <h2 className="text-gray-400 font-bold">
+        ПОДСКАЗКА 3
+      </h2>
+
+      <Lock className="text-yellow-500" />
+    </div>
+
+    <p className="text-gray-500 text-sm">
+      Откроется через:
+    </p>
+
+    <p className="text-yellow-500 text-2xl font-bold mt-2">
+      {hint3Time}
+    </p>
+
+  </div>
+)}
           </div>
         </div>
       )}
-
       {openedHint && (
         <div className="fixed inset-0 bg-black z-[60] px-6 py-8">
 
@@ -450,7 +580,33 @@ useEffect(() => {
 
         </div>
       )}
+{foundScreen && (
+  <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden">
 
+    <div className="absolute w-[500px] h-[500px] bg-yellow-500 opacity-20 blur-[120px] animate-pulse rounded-full" />
+
+    <div className="relative z-10 text-center animate-[pulse_2s_infinite]">
+
+      <p className="text-yellow-500 tracking-[6px] text-sm mb-4">
+        ACCESS GRANTED
+      </p>
+
+      <h1 className="text-5xl font-bold text-yellow-400 tracking-[10px] mb-6">
+        CARD FOUND
+      </h1>
+
+      <div className="w-32 h-32 rounded-3xl border border-yellow-500 bg-[#111111]/80 backdrop-blur-xl shadow-[0_0_40px_rgba(255,215,0,0.4)] flex items-center justify-center mx-auto">
+
+        <div className="w-16 h-16 rounded-full bg-yellow-500 blur-sm animate-pulse" />
+
+      </div>
+
+      <p className="text-gray-500 mt-8 tracking-[4px] text-sm">
+        VANTA SYSTEM UPDATED
+      </p>
+    </div>
+  </div>
+)}
     </main>
   );
 }
