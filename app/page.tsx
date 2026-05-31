@@ -49,6 +49,7 @@ useEffect(() => {
   const [message, setMessage] = useState("");
   const [timeLeft, setTimeLeft] = useState("");
   const [foundScreen, setFoundScreen] = useState(false);
+  const [foundCards, setFoundCards] = useState<string[]>([]);
   
   const [hint2Unlocked, setHint2Unlocked] = useState(false);
   const [hint3Unlocked, setHint3Unlocked] = useState(false);
@@ -91,6 +92,13 @@ useEffect(() => {
 
   if (storedName) {
     setSavedName(storedName);
+  }
+}, []);
+useEffect(() => {
+  const savedCards = localStorage.getItem("vanta_cards");
+
+  if (savedCards) {
+    setFoundCards(JSON.parse(savedCards));
   }
 }, []);
 useEffect(() => {
@@ -290,39 +298,74 @@ useEffect(() => {
         )}
 
         {tab === "found" && (
-          <div className="bg-[#111111] rounded-3xl p-6 border border-yellow-600 shadow-[0_0_35px_rgba(255,215,0,0.12)]">
+  <div className="space-y-4">
 
-            <h1 className="text-2xl font-bold text-yellow-500 mb-6 tracking-[4px]">
-              FOUND
-            </h1>
+    <div className="bg-[#111111] rounded-3xl p-6 border border-yellow-600 shadow-[0_0_35px_rgba(255,215,0,0.12)]">
 
-            <div className="space-y-4">
+      <p className="text-gray-400 text-sm mb-2">
+        БАЛАНС
+      </p>
 
-              <div className="bg-[#1A1A1A] rounded-2xl p-4 border border-[#222]">
-                <p className="text-yellow-500 font-bold">
-                  @shadowfinder
-                </p>
+      <h1 className="text-4xl font-bold text-yellow-500">
+        5000 ₽
+      </h1>
 
-                <p className="text-gray-400 text-sm">
-                  Moscow • 22:14
-                </p>
-              </div>
+    </div>
 
-              <div className="bg-[#1A1A1A] rounded-2xl p-4 border border-[#222]">
-                <p className="text-yellow-500 font-bold">
-                  @nightwalker
-                </p>
+    <div className="bg-[#111111] rounded-3xl p-6 border border-yellow-600 shadow-[0_0_35px_rgba(255,215,0,0.12)]">
 
-                <p className="text-gray-400 text-sm">
-                  Saint Petersburg • 01:43
-                </p>
-              </div>
+      <p className="text-gray-400 text-sm mb-2">
+        НАЙДЕНО КАРТ
+      </p>
 
-            </div>
+      <h1 className="text-4xl font-bold text-yellow-500">
+        {foundCards.length}
+      </h1>
+
+    </div>
+
+    {foundCards.includes("QUEST001") && (
+      <div className="bg-[#111111] rounded-3xl p-5 border border-yellow-600 shadow-[0_0_25px_rgba(255,215,0,0.12)]">
+
+        <div className="flex items-center justify-between mb-4">
+
+          <div>
+            <p className="text-gray-500 text-xs">
+              CARD #001
+            </p>
+
+            <h2 className="text-yellow-500 text-xl font-bold">
+              QUEST001
+            </h2>
           </div>
-        )}
+
+          <div className="text-right">
+            <p className="text-gray-500 text-xs">
+              НАГРАДА
+            </p>
+
+            <p className="text-green-500 font-bold text-lg">
+              +5000 ₽
+            </p>
+          </div>
+
+        </div>
+
+       <button
+  onClick={() => setOpenedHint(1)}
+  className="w-full mt-4 bg-yellow-500 hover:bg-yellow-400 transition-all text-black font-bold py-3 rounded-2xl"
+>
+  ОТКРЫТЬ
+</button>
+
+      </div>
+    )}
+
+  </div>
+)}
 
         {tab === "profile" && (
+          <>
           <div className="bg-[#111111] rounded-3xl p-6 border border-yellow-600 shadow-[0_0_35px_rgba(255,215,0,0.12)] text-center">
 
             <div className="w-24 h-24 rounded-full bg-yellow-500 mx-auto mb-6 shadow-[0_0_25px_rgba(255,215,0,0.35)]" />
@@ -341,10 +384,34 @@ useEffect(() => {
               </p>
 
               <p className="text-3xl text-yellow-500 font-bold">
-                2
+                {foundCards.length}
               </p>
             </div>
           </div>
+          <div className="bg-[#1A1A1A] rounded-2xl p-4 border border-[#222] mt-4">
+
+  <p className="text-gray-400 text-sm mb-3">
+    Найденные карты
+  </p>
+
+  {foundCards.length === 0 ? (
+    <p className="text-gray-500">
+      Пока нет карт
+    </p>
+  ) : (
+    <div className="space-y-2">
+      {foundCards.map((card) => (
+        <div
+          key={card}
+          className="bg-black border border-yellow-600 rounded-xl px-3 py-2 text-yellow-500"
+        >
+          {card}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+  </>
         )}
 
         <div className="flex justify-around items-center bg-[#111111] border border-yellow-600 rounded-2xl py-4 mt-6 shadow-[0_0_20px_rgba(255,215,0,0.05)]">
@@ -408,6 +475,16 @@ useEffect(() => {
               onClick={() => {
               if (code === "QUEST001") {
   setFoundScreen(true);
+if (!foundCards.includes("QUEST001")) {
+  const updatedCards = [...foundCards, "QUEST001"];
+
+  setFoundCards(updatedCards);
+
+  localStorage.setItem(
+    "vanta_cards",
+    JSON.stringify(updatedCards)
+  );
+}
 
   setTimeout(() => {
     setFoundScreen(false);
