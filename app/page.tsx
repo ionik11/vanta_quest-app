@@ -648,14 +648,16 @@ if (!foundCards.includes("QUEST001")) {
             ПОДСКАЗКА {openedHint}
           </h1>
 
-          <div className="rounded-3xl overflow-hidden border border-yellow-600 shadow-[0_0_30px_rgba(255,215,0,0.12)]">
+         <div className="rounded-3xl overflow-hidden border border-yellow-600 shadow-[0_0_30px_rgba(255,215,0,0.12)] p-4 bg-[#111111]">
 
-            <div className="h-[500px] bg-[#111111] flex items-center justify-center text-gray-500">
-              photo hint
-            </div>
-          </div>
+  <img
+    src="pfp.jpg"
+    alt="Hint 1"
+    className="w-full rounded-2xl"
+  />
 
-        </div>
+</div>
+              </div>
       )}
 {foundScreen && (
   <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center overflow-hidden">
