@@ -5,6 +5,19 @@ declare global {
     Telegram?: any;
   }
 }
+import { db } from "../firebase";
+import {
+  collection,
+  addDoc,
+  doc,
+  setDoc,
+  updateDoc,
+  increment,
+  getDoc,
+  query,
+where,
+getDocs,
+} from "firebase/firestore";
 import { useState, useEffect } from "react";
 import {
   Search,
@@ -50,6 +63,9 @@ useEffect(() => {
   const [timeLeft, setTimeLeft] = useState("");
   const [foundScreen, setFoundScreen] = useState(false);
   const [foundCards, setFoundCards] = useState<string[]>([]);
+  const [firebaseBalance, setFirebaseBalance] = useState(0);
+  const [cardNumber, setCardNumber] = useState("");
+
   
   const [hint2Unlocked, setHint2Unlocked] = useState(false);
   const [hint3Unlocked, setHint3Unlocked] = useState(false);
@@ -88,11 +104,25 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, []);
 useEffect(() => {
-  const storedName = localStorage.getItem("vanta_name");
+  const loadUser = async () => {
+    const storedName = localStorage.getItem("vanta_name");
 
-  if (storedName) {
+    if (!storedName) return;
+
     setSavedName(storedName);
-  }
+
+    const userDoc = await getDoc(
+      doc(db, "users", storedName)
+    );
+
+    if (userDoc.exists()) {
+      const data = userDoc.data();
+
+      setFirebaseBalance(data.balance || 0);
+    }
+  };
+
+  loadUser();
 }, []);
 useEffect(() => {
   const savedCards = localStorage.getItem("vanta_cards");
@@ -179,16 +209,27 @@ useEffect(() => {
         />
 
         <button
-          onClick={() => {
-            if (nickname.trim()) {
-              localStorage.setItem("vanta_name", nickname);
-              setSavedName(nickname);
-            }
-          }}
-          className="w-full bg-yellow-500 hover:bg-yellow-400 transition-all duration-300 text-black font-bold py-4 rounded-2xl shadow-[0_0_25px_rgba(255,215,0,0.35)]"
-        >
-          ENTER VANTA
-        </button>
+  onClick={async () => {
+    if (nickname.trim()) {
+
+      localStorage.setItem("vanta_name", nickname);
+      setSavedName(nickname);
+
+      await setDoc(
+        doc(db, "users", nickname),
+        {
+          nickname: nickname,
+          balance: 0,
+          cardsFound: 0,
+        },
+        { merge: true }
+      );
+    }
+  }}
+  className="w-full bg-yellow-500 hover:bg-yellow-400 transition-all duration-300 text-black font-bold py-4 rounded-2xl shadow-[0_0_25px_rgba(255,215,0,0.35)]"
+>
+  ENTER VANTA
+</button>
       </div>
     </main>
   );
@@ -300,17 +341,7 @@ useEffect(() => {
         {tab === "found" && (
   <div className="space-y-4">
 
-    <div className="bg-[#111111] rounded-3xl p-6 border border-yellow-600 shadow-[0_0_35px_rgba(255,215,0,0.12)]">
 
-      <p className="text-gray-400 text-sm mb-2">
-        БАЛАНС
-      </p>
-
-      <h1 className="text-4xl font-bold text-yellow-500">
-        5000 ₽
-      </h1>
-
-    </div>
 
     <div className="bg-[#111111] rounded-3xl p-6 border border-yellow-600 shadow-[0_0_35px_rgba(255,215,0,0.12)]">
 
@@ -324,42 +355,54 @@ useEffect(() => {
 
     </div>
 
-    {foundCards.includes("QUEST001") && (
-      <div className="bg-[#111111] rounded-3xl p-5 border border-yellow-600 shadow-[0_0_25px_rgba(255,215,0,0.12)]">
+    {foundCards.map((card) => {
 
-        <div className="flex items-center justify-between mb-4">
+  const reward =
+    card === "QUEST001"
+      ? 5000
+      : card === "QUEST002"
+      ? 3000
+      : 7000;
 
-          <div>
-            <p className="text-gray-500 text-xs">
-              CARD #001
-            </p>
+  return (
+    <div
+      key={card}
+      className="bg-[#111111] rounded-3xl p-5 border border-yellow-600 shadow-[0_0_25px_rgba(255,215,0,0.12)]"
+    >
+      <div className="flex items-center justify-between mb-4">
 
-            <h2 className="text-yellow-500 text-xl font-bold">
-              QUEST001
-            </h2>
-          </div>
+        <div>
+          <p className="text-gray-500 text-xs">
+            CARD
+          </p>
 
-          <div className="text-right">
-            <p className="text-gray-500 text-xs">
-              НАГРАДА
-            </p>
-
-            <p className="text-green-500 font-bold text-lg">
-              +5000 ₽
-            </p>
-          </div>
-
+          <h2 className="text-yellow-500 text-xl font-bold">
+            {card}
+          </h2>
         </div>
 
-       <button
-  onClick={() => setOpenedHint(1)}
-  className="w-full mt-4 bg-yellow-500 hover:bg-yellow-400 transition-all text-black font-bold py-3 rounded-2xl"
->
-  ОТКРЫТЬ
-</button>
+        <div className="text-right">
+          <p className="text-gray-500 text-xs">
+            НАГРАДА
+          </p>
+
+          <p className="text-green-500 font-bold text-lg">
+            +{reward} ₽
+          </p>
+        </div>
 
       </div>
-    )}
+
+      <button
+        onClick={() => setOpenedHint(1)}
+        className="w-full mt-4 bg-yellow-500 hover:bg-yellow-400 transition-all text-black font-bold py-3 rounded-2xl"
+      >
+        ОТКРЫТЬ
+      </button>
+
+    </div>
+  );
+})}
 
   </div>
 )}
@@ -371,17 +414,90 @@ useEffect(() => {
             <div className="w-24 h-24 rounded-full bg-yellow-500 mx-auto mb-6 shadow-[0_0_25px_rgba(255,215,0,0.35)]" />
 
             <h1 className="text-2xl font-bold text-yellow-500 mb-2">
-             {savedName}
-            </h1>
+  {savedName}
+</h1>
 
-            <p className="text-gray-400 mb-6">
-              ACCESS LEVEL 1
-            </p>
+<div className="bg-[#1A1A1A] rounded-2xl p-4 border border-[#222] mb-4 mt-4">
+  <p className="text-gray-400 text-sm mb-2">
+    Баланс
+  </p>
 
-            <div className="bg-[#1A1A1A] rounded-2xl p-4 border border-[#222]">
-              <p className="text-gray-400 text-sm mb-2">
-                Найдено карточек
-              </p>
+  <p className="text-3xl text-yellow-500 font-bold">
+    {firebaseBalance} ₽
+  </p>
+  
+  <input
+  value={cardNumber}
+  onChange={(e) => setCardNumber(e.target.value)}
+  placeholder="Номер карты"
+  className="w-full bg-[#1A1A1A] border border-[#333] rounded-2xl px-4 py-3 text-white outline-none mt-4"
+/>
+
+  <button
+  onClick={async () => {
+    const q = query(
+  collection(db, "withdrawals"),
+  where("user", "==", savedName),
+  where("status", "==", "pending")
+);
+
+const existing = await getDocs(q);
+
+if (!existing.empty) {
+  alert("У вас уже есть заявка на вывод");
+  return;
+}
+
+    if (firebaseBalance <= 0) {
+      alert("Недостаточно средств");
+      return;
+    }
+
+    if (cardNumber.length < 16) {
+      alert("Введите номер карты");
+      return;
+    }
+
+    await addDoc(collection(db, "withdrawals"), {
+      user: savedName,
+      amount: firebaseBalance,
+      cardNumber: cardNumber,
+      status: "pending",
+      createdAt: new Date(),
+    });
+
+    alert("Заявка на вывод отправлена");
+  }}
+  className="w-full bg-green-600 hover:bg-green-500 transition-all text-white font-bold py-3 rounded-2xl mt-4"
+>
+  ВЫВЕСТИ СРЕДСТВА
+</button>
+</div>
+
+<button
+  onClick={() => {
+    localStorage.removeItem("vanta_name");
+    window.location.reload();
+  }}
+  className="w-full bg-red-600 hover:bg-red-500 transition-all text-white font-bold py-3 rounded-2xl mb-4"
+>
+  ВЫЙТИ ИЗ ПРОФИЛЯ
+</button>
+
+<button
+  onClick={() => {
+    localStorage.removeItem("vanta_cards");
+    window.location.reload();
+  }}
+  className="w-full bg-yellow-600 hover:bg-yellow-500 transition-all text-black font-bold py-3 rounded-2xl mb-4"
+>
+  СБРОСИТЬ КАРТОЧКИ
+</button>
+
+<div className="bg-[#1A1A1A] rounded-2xl p-4 border border-[#222]">
+  <p className="text-gray-400 text-sm mb-2">
+    Найдено карточек
+  </p>
 
               <p className="text-3xl text-yellow-500 font-bold">
                 {foundCards.length}
@@ -472,10 +588,32 @@ useEffect(() => {
             />
 
             <button
-              onClick={() => {
+              onClick={async () => {
               if (code === "QUEST001") {
+
+  if (foundCards.includes("QUEST001")) {
+    setMessage("НАГРАДА УЖЕ ПОЛУЧЕНА");
+    return;
+  }
+
   setFoundScreen(true);
-if (!foundCards.includes("QUEST001")) {
+
+  addDoc(collection(db, "finds"), {
+    card: "QUEST001",
+    user: savedName,
+    foundAt: new Date(),
+  });
+
+  await updateDoc(
+    doc(db, "users", savedName),
+    {
+      balance: increment(5000),
+      cardsFound: increment(1),
+    }
+  );
+
+  setFirebaseBalance((prev) => prev + 5000);
+
   const updatedCards = [...foundCards, "QUEST001"];
 
   setFoundCards(updatedCards);
@@ -484,7 +622,46 @@ if (!foundCards.includes("QUEST001")) {
     "vanta_cards",
     JSON.stringify(updatedCards)
   );
-}
+
+  setTimeout(() => {
+    setFoundScreen(false);
+    setShowModal(false);
+  }, 3500);
+
+} else if (code === "QUEST002") {
+
+  setFoundScreen(true);
+
+  if (!foundCards.includes("QUEST002")) {
+    const updatedCards = [...foundCards, "QUEST002"];
+
+    setFoundCards(updatedCards);
+
+    localStorage.setItem(
+      "vanta_cards",
+      JSON.stringify(updatedCards)
+    );
+  }
+
+  setTimeout(() => {
+    setFoundScreen(false);
+    setShowModal(false);
+  }, 3500);
+
+} else if (code === "QUEST003") {
+
+  setFoundScreen(true);
+
+  if (!foundCards.includes("QUEST003")) {
+    const updatedCards = [...foundCards, "QUEST003"];
+
+    setFoundCards(updatedCards);
+
+    localStorage.setItem(
+      "vanta_cards",
+      JSON.stringify(updatedCards)
+    );
+  }
 
   setTimeout(() => {
     setFoundScreen(false);
@@ -651,11 +828,16 @@ if (!foundCards.includes("QUEST001")) {
          <div className="rounded-3xl overflow-hidden border border-yellow-600 shadow-[0_0_30px_rgba(255,215,0,0.12)] p-4 bg-[#111111]">
 
   <img
-    src="pfp.jpg"
-    alt="Hint 1"
-    className="w-full rounded-2xl"
-  />
-
+  src={
+    openedHint === 1
+      ? "/hint1.jpg"
+      : openedHint === 2
+      ? "/hint2.jpg"
+      : "/hint3.jpg"
+  }
+  alt="Hint"
+  className="w-full rounded-2xl"
+/>
 </div>
               </div>
       )}
