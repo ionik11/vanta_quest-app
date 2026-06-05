@@ -48,21 +48,7 @@ useEffect(() => {
     }
   }
 }, []);
-console.log("TG", window.Telegram?.WebApp);
-useEffect(() => {
-  const tg = window.Telegram?.WebApp;
-  console.log("TG", tg);
-console.log("TG USER", tg?.initDataUnsafe?.user);
 
-  if (tg) {
-    tg.ready();
-
-    if (tg.initDataUnsafe?.user) {
-      setUser(tg.initDataUnsafe.user);
-      console.log("TG USER", tg.initDataUnsafe.user);
-    }
-  }
-}, []);
 
 useEffect(() => {
   console.log("USER DATA:", user);
@@ -450,7 +436,7 @@ useEffect(() => {
   <p className="text-gray-400 text-sm mb-2">
     Баланс
   </p>
-
+{JSON.stringify(user)}
   <p className="text-3xl text-yellow-500 font-bold">
     {firebaseBalance} ₽
   </p>
