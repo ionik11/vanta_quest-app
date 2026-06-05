@@ -120,15 +120,19 @@ useEffect(() => {
 }, []);
 useEffect(() => {
   const loadUser = async () => {
-    const storedName = localStorage.getItem("vanta_name");
+    const telegramId = user?.id?.toString();
 
-    if (!storedName) return;
+if (!telegramId) return;
 
-    setSavedName(storedName);
+const userDoc = await getDoc(
+  doc(db, "users", telegramId)
+);
 
-    const userDoc = await getDoc(
-      doc(db, "users", storedName)
-    );
+if (userDoc.exists()) {
+  const data = userDoc.data();
+
+  setFirebaseBalance(data.balance || 0);
+}
 
     if (userDoc.exists()) {
       const data = userDoc.data();
@@ -204,7 +208,7 @@ useEffect(() => {
     );
   }
 
-  if (!savedName) {
+  if (!savedName && !user) {
   return (
     <main className="h-screen bg-black relative overflow-hidden text-white flex items-center justify-center px-6">
 
