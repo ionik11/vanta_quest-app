@@ -48,6 +48,17 @@ useEffect(() => {
     }
   }
 }, []);
+useEffect(() => {
+  if (!user) return;
+
+  const telegramName =
+    user.username ||
+    `${user.first_name || ""} ${user.last_name || ""}`.trim() ||
+    `user_${user.id}`;
+
+  localStorage.setItem("vanta_name", telegramName);
+  setSavedName(telegramName);
+}, [user]);
   const [entered, setEntered] = useState(false);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("quest");
