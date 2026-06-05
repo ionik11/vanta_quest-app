@@ -429,7 +429,7 @@ useEffect(() => {
             <div className="w-24 h-24 rounded-full bg-yellow-500 mx-auto mb-6 shadow-[0_0_25px_rgba(255,215,0,0.35)]" />
 
             <h1 className="text-2xl font-bold text-yellow-500 mb-2">
-  {savedName}
+  {user?.username || savedName}
 </h1>
 
 <div className="bg-[#1A1A1A] rounded-2xl p-4 border border-[#222] mb-4 mt-4">
