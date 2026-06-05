@@ -38,6 +38,19 @@ useEffect(() => {
 const [user, setUser] = useState<any>(null);
 useEffect(() => {
   const tg = window.Telegram?.WebApp;
+
+  if (tg) {
+    tg.ready();
+
+    if (tg.initDataUnsafe?.user) {
+      setUser(tg.initDataUnsafe.user);
+      console.log("TG USER", tg.initDataUnsafe.user);
+    }
+  }
+}, []);
+console.log("TG", window.Telegram?.WebApp);
+useEffect(() => {
+  const tg = window.Telegram?.WebApp;
   console.log("TG", tg);
 console.log("TG USER", tg?.initDataUnsafe?.user);
 
