@@ -38,17 +38,8 @@ useEffect(() => {
 const [user, setUser] = useState<any>(null);
 
 useEffect(() => {
-  const tg = window.Telegram?.WebApp;
+  console.log("USER DATA:", user);
 
-  if (tg) {
-    tg.ready();
-
-    if (tg.initDataUnsafe?.user) {
-      setUser(tg.initDataUnsafe.user);
-    }
-  }
-}, []);
-useEffect(() => {
   if (!user) return;
 
   const telegramName =
