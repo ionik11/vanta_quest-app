@@ -436,7 +436,7 @@ useEffect(() => {
   <p className="text-gray-400 text-sm mb-2">
     Баланс
   </p>
-{JSON.stringify(user)}
+{user?.username || savedName}
   <p className="text-3xl text-yellow-500 font-bold">
     {firebaseBalance} ₽
   </p>
